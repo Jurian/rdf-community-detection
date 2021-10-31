@@ -36,35 +36,6 @@ public abstract class EmbeddingWriter {
 		writer.write("# Gradient Descent Algorithm: " + config.getOpt().getMethod() + "\n");
 		writer.write("# " + config.getMethod() + " Tolerance: " + config.getOpt().getTolerance() + "\n");
 		writer.write("# " + config.getMethod() + " Maximum Iterations: " + config.getOpt().getMaxiter() + "\n");
-		switch(config.getPredicates().getTypeEnum()) {
-			case NONE:
-				writer.write("# Using no predicate weights:"+ "\n");
-				for(String s : config.getPredicates().getFilter()) {
-					writer.write("# " + s + ": " + 1.0F + "\n");
-				}
-				break;
-			case MANUAL:
-				writer.write("# Using manual predicate weights:"+ "\n");
-				for(String s : config.getPredicates().getFilter()) {
-					writer.write("# " + s + ": " + config.getPredicates().getWeights().getOrDefault(s, 1.0F) + "\n");
-				}
-				break;
-			case PAGERANK:
-				writer.write("# Pagerank weights used"+ "\n");
-				break;
-			case FREQUENCY:
-				writer.write("# Predicate frequency weights used"+ "\n");
-				break;
-			case INVERSE_FREQUENCY:
-				writer.write("# Inverse predicate frequency weights used"+ "\n");
-				break;
-		}
-		if(config.usingSimilarity()) {
-			writer.write("# Using the following similarity metrics:" + "\n");
-			for (Configuration.SimilarityGroup s : config.getSimilarity()) {
-				writer.write("# " + s.toString() + "\n");
-			}
-		} else writer.write("# No similarity matching will be performed" + "\n");
 	}
 
 	public abstract void write(Optimum optimum, CoOccurrenceMatrix coMatrix, Path outputFolder) throws IOException;
