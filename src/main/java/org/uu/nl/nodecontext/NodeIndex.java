@@ -3,7 +3,6 @@ package org.uu.nl.nodecontext;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ReadWrite;
-import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -24,54 +23,58 @@ public class NodeIndex implements KeyIndex {
         this.focusType = focusType;
 
         try {
-            dataset.begin(ReadWrite.READ);
-
-            StmtIterator resources = dataset.getUnionModel().listStatements();
             try {
-                while(resources.hasNext()) {
-                    final Resource res = resources.nextStatement().getSubject();
+                dataset.begin(ReadWrite.READ);
 
-                    if(isFocusNode(res)) {
-                        focusNodes.putIfAbsent(res.asNode(), focusNodes.size());
-                    } else {
-                        nodeIndexes.putIfAbsent(res.asNode(), nodeIndexes.size());
-                    }
+                StmtIterator resources = dataset.getUnionModel().listStatements();
+                try {
+                    while(resources.hasNext()) {
+                        final Resource res = resources.nextStatement().getSubject();
 
-                    StmtIterator properties = res.listProperties();
-
-                    try {
-                        while(properties.hasNext()){
-                            Statement property = properties.nextStatement();
-                            // Ignore type information!
-                            if(property.getPredicate() != RDF.type)
-                                nodeIndexes.putIfAbsent(property.getObject().asNode(), nodeIndexes.size());
+                        if(isFocusNode(res)) {
+                            focusNodes.putIfAbsent(res.asNode(), focusNodes.size());
+                        } else {
+                            nodeIndexes.putIfAbsent(res.asNode(), nodeIndexes.size());
                         }
-                    } finally {
-                        properties.close();
+
+                        StmtIterator properties = res.listProperties();
+
+                        try {
+                            while(properties.hasNext()){
+                                Statement property = properties.nextStatement();
+                                // Ignore type information!
+                                if(property.getPredicate() != RDF.type)
+                                    nodeIndexes.putIfAbsent(property.getObject().asNode(), nodeIndexes.size());
+                            }
+                        } finally {
+                            properties.close();
+                        }
                     }
+                } finally {
+                    resources.close();
                 }
             } finally {
-                resources.close();
+                dataset.end();
             }
+
+
+
+            nFocusNodes = focusNodes.size();
+            focusKeys = new String[nFocusNodes];
+
+            for(Map.Entry<Node, Integer> entry : focusNodes.entrySet()) {
+                focusKeys[entry.getValue()] = entry.getKey().getURI();
+            }
+
+            // Shift the index all non-focus nodes
+            for(Map.Entry<Node, Integer> entry : nodeIndexes.entrySet()) {
+                entry.setValue(entry.getValue() + nFocusNodes);
+            }
+            nodeIndexes.putAll(focusNodes);
+            nContextNodes = nodeIndexes.size();
         } finally {
-            dataset.end();
+            dataset.close();
         }
-
-
-
-        nFocusNodes = focusNodes.size();
-        focusKeys = new String[nFocusNodes];
-
-        for(Map.Entry<Node, Integer> entry : focusNodes.entrySet()) {
-            focusKeys[entry.getValue()] = entry.getKey().getURI();
-        }
-
-        // Shift the index all non-focus nodes
-        for(Map.Entry<Node, Integer> entry : nodeIndexes.entrySet()) {
-            entry.setValue(entry.getValue() + nFocusNodes);
-        }
-        nodeIndexes.putAll(focusNodes);
-        nContextNodes = nodeIndexes.size();
     }
 
     public void clear() {
