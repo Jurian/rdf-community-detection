@@ -78,7 +78,7 @@ public abstract class Optimizer implements IOptimizer {
 	public Optimum optimize() throws OptimizationFailedException {
 
 		final Optimum opt = new Optimum();
-		final ExecutorService es = Executors.newWorkStealingPool(numThreads);
+		final ExecutorService es = Executors.newFixedThreadPool(numThreads);
 		final CompletionService<Float> completionService = new ExecutorCompletionService<>(es);
 
 		try(ProgressBar pb = Configuration.progressBar(getName(), maxIterations, "epochs")) {
