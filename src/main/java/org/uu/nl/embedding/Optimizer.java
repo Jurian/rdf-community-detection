@@ -8,7 +8,6 @@ import org.uu.nl.util.config.Configuration;
 import org.uu.nl.util.rnd.ExtendedRandom;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.concurrent.*;
 
 /**
@@ -26,7 +25,8 @@ public abstract class Optimizer implements IOptimizer {
 	protected final int numThreads;
 	protected final int coCount;
 	protected final float learningRate = 0.05f;
-	protected final float[][] focus, context;
+	protected final double[][] focus;
+	protected final double[][] context;
 	protected final float[] fBias, cBias;
 	protected final int[] linesPerThread;
 	protected final CostFunction costFunction;
@@ -46,8 +46,8 @@ public abstract class Optimizer implements IOptimizer {
 		this.coCount = coMatrix.coOccurrenceCount();
 		this.dimension = config.getEmbedding().getDim();
 
-		this.focus = new float[focusVectors][dimension];
-		this.context = new float[contextVectors][dimension];
+		this.focus = new double[focusVectors][dimension];
+		this.context = new double[contextVectors][dimension];
 		this.fBias = new float[focusVectors];
 		this.cBias = new float[contextVectors];
 
@@ -75,11 +75,11 @@ public abstract class Optimizer implements IOptimizer {
 	}
 
 	@Override
-	public Optimum optimize() throws OptimizationFailedException {
+	public Embedding optimize() throws OptimizationFailedException {
 
-		final Optimum opt = new Optimum();
+		final Embedding opt = new Embedding(this);
 		final ExecutorService es = Executors.newFixedThreadPool(numThreads);
-		final CompletionService<Float> completionService = new ExecutorCompletionService<>(es);
+		final CompletionService<Double> completionService = new ExecutorCompletionService<>(es);
 
 		try(ProgressBar pb = Configuration.progressBar(getName(), maxIterations, "epochs")) {
 
@@ -118,10 +118,6 @@ public abstract class Optimizer implements IOptimizer {
 				prevCost = localCost;
 
 				if(iterDiff <= tolerance) {
-
-					opt.setResultIterator(new EmbeddingIterator());
-					opt.setFinalCost(localCost);
-
 					break;
 				}
 			}
@@ -137,59 +133,8 @@ public abstract class Optimizer implements IOptimizer {
 		return new BigDecimal(iterDiff).stripTrailingZeros().toPlainString();
 	}
 
-	/**
-	 * Instead of wasting RAM by copying the entire embedding to a new double array,
-	 * we can access it as a stream of float arrays with this iterator.
-	 */
-	class EmbeddingIterator implements Iterator<EmbeddedEntity> {
 
-		private int focusIndex = 0;
 
-		@Override
-		public boolean hasNext() {
-			return focusIndex < focusVectors;
-		}
 
-		@Override
-		public EmbeddedEntity next() {
-
-			final EmbeddedEntity entity = new EmbeddedEntity(
-					focusIndex,
-					nodeIndex.getKey(focusIndex),
-					focus[focusIndex]
-			);
-
-			focusIndex++;
-			return entity;
-		}
-	}
-
-	/**
-	 * View of an embedded entity
-	 */
-	public static class EmbeddedEntity {
-
-		private final int index;
-		private final String key;
-		private final float[] vector;
-
-		public EmbeddedEntity(int index, String key, float[] vector) {
-			this.index = index;
-			this.key = key;
-			this.vector = vector;
-		}
-
-		public int getIndex() {
-			return index;
-		}
-
-		public String getKey() {
-			return key;
-		}
-
-		public float[] getVector() {
-			return vector;
-		}
-	}
 
 }

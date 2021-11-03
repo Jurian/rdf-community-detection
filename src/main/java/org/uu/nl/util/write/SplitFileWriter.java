@@ -3,7 +3,7 @@ package org.uu.nl.util.write;
 import me.tongfei.progressbar.ProgressBar;
 import org.uu.nl.embedding.CoOccurrenceMatrix;
 import org.uu.nl.embedding.Optimizer;
-import org.uu.nl.embedding.Optimum;
+import org.uu.nl.embedding.Embedding;
 import org.uu.nl.util.config.Configuration;
 
 import java.io.BufferedWriter;
@@ -31,14 +31,14 @@ public class SplitFileWriter extends EmbeddingWriter {
 	}
 
 	@Override
-	public void write(Optimum optimum, CoOccurrenceMatrix coMatrix, Path outputFolder) throws IOException {
+	public void write(Embedding embedding, CoOccurrenceMatrix coMatrix, Path outputFolder) throws IOException {
 
 		Files.createDirectories(outputFolder);
 
 		final int vocabSize = coMatrix.nrOfFocusVectors();
 		final int dimension = config.getEmbedding().getDim();
 		final String[] out = new String[dimension];
-		final Iterator<Optimizer.EmbeddedEntity> entityIterator = optimum.iterator();
+		final Iterator<Embedding.EmbeddedEntity> entityIterator = embedding.iterator();
 
 		// Create a tab-separated file
 		final String delimiter = "\t";
@@ -56,10 +56,10 @@ public class SplitFileWriter extends EmbeddingWriter {
 			Configuration.Output output = config.getOutput();
 
 			while(entityIterator.hasNext()) {
-				Optimizer.EmbeddedEntity entity = entityIterator.next();
+				Embedding.EmbeddedEntity entity = entityIterator.next();
 
 				for (int d = 0; d < out.length; d++)
-					out[d] = String.format("%11.6E", entity.getVector()[d]);
+					out[d] = String.format("%11.6E", entity.getPoint()[d]);
 
 				vect.write(String.join(delimiter, out) + newLine);
 				// We assume here that we only write URI nodes!

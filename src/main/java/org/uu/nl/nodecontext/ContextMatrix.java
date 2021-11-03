@@ -11,7 +11,7 @@ public class ContextMatrix implements CoOccurrenceMatrix {
     // Represent our sparse matrix this way for efficient lookups
     public final int[] rows;
     public final int[] cols;
-    public final float[] values; // Use floats for lower memory footprint
+    public final double[] values; // Use floats for lower memory footprint
     private float max;
     private final int focusVectors, contextVectors;
     private final int coOccurrenceCount;
@@ -21,7 +21,7 @@ public class ContextMatrix implements CoOccurrenceMatrix {
     public ContextMatrix(NodeIndex nodeIndex, int nOccurrences) {
         this.rows = new int[nOccurrences];
         this.cols = new int[nOccurrences];
-        this.values = new float[nOccurrences];
+        this.values = new double[nOccurrences];
         this.coOccurrenceCount = nOccurrences;
         this.permutation = new Permutation(coOccurrenceCount);
         this.focusVectors = nodeIndex.nFocusNodes;
@@ -60,7 +60,7 @@ public class ContextMatrix implements CoOccurrenceMatrix {
         return this.cols[permutation.randomAccess(x)];
     }
 
-    public float cIdx_C(int x) {
+    public double cIdx_C(int x) {
         return this.values[permutation.randomAccess(x)];
     }
 

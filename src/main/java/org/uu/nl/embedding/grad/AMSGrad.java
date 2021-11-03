@@ -49,38 +49,41 @@ public class AMSGrad extends Optimizer {
 	/**
 	 * Contains the maximum of the past first moments w.r.t. to all parameters
 	 */
-	private final float[][] M1focus, M1context;
-	private final float[] M1fBias, M1cBias;
+	private final double[][] M1focus;
+    private final double[][] M1context;
+	private final double[] M1fBias;
+    private final double[] M1cBias;
 	/**
 	 * Contains the maximum of the past second moments w.r.t. to all parameters
 	 */
-	private final float[][] M2focus, M2context;
-	private final float[] M2fBias, M2cBias;
+	private final double[][] M2focus;
+	private final double[][] M2context;
+	private final double[] M2fBias, M2cBias;
 	/**
 	 * Decay rate for first momentum
 	 */
-	private final float beta1 = 0.9f;
+	private final double beta1 = 0.9f;
 	/**
 	 * Decay rate for second momentum
 	 */
-	private final float beta2 = 0.999f;
+	private final double beta2 = 0.999f;
 	/**
 	 * Mainly used to prevent divisions by zero, in some cases setting this to 0.1
 	 * or 1 can help improve stability
 	 */
-	private final float epsilon = 1e-1f;
+	private final double epsilon = 1e-1f;
 
 	public AMSGrad(CoOccurrenceMatrix coMatrix, KeyIndex keyIndex, Configuration config, CostFunction costFunction) {
 		super(coMatrix, keyIndex, config, costFunction);
 
-		this.M1focus = new float[focusVectors][dimension];
-		this.M2focus = new float[focusVectors][dimension];
-		this.M1context = new float[contextVectors][dimension];
-		this.M2context = new float[contextVectors][dimension];
-		this.M1fBias = new float[focusVectors];
-		this.M2fBias = new float[focusVectors];
-		this.M1cBias = new float[contextVectors];
-		this.M2cBias = new float[contextVectors];
+		this.M1focus = new double[focusVectors][dimension];
+		this.M2focus = new double[focusVectors][dimension];
+		this.M1context = new double[contextVectors][dimension];
+		this.M2context = new double[contextVectors][dimension];
+		this.M1fBias = new double[focusVectors];
+		this.M2fBias = new double[focusVectors];
+		this.M1cBias = new double[contextVectors];
+		this.M2cBias = new double[contextVectors];
 	}
 	
 	@Override
@@ -94,9 +97,15 @@ public class AMSGrad extends Optimizer {
 		return () -> {
 
 			int i, d, i_u, i_v, bu, bv;
-			float Xij, m, v, grad_u, grad_v;
-			float cost = 0, innerCost, weightedCost;
-			final int offset = coCount / numThreads * id;
+			double Xij;
+            double m;
+			double v;
+            double grad_u;
+            double grad_v;
+			double cost = 0;
+            double innerCost;
+            double weightedCost;
+            final int offset = coCount / numThreads * id;
 
 			for (i = 0; i < linesPerThread[id]; i++) {
 

@@ -4,9 +4,9 @@ import org.apache.commons.math3.util.FastMath;
 
 public class GloveCost implements CostFunction {
 
-    public float innerCost(Optimizer opt, float Xij, int u, int v) {
+    public double innerCost(Optimizer opt, double Xij, int u, int v) {
 
-        float innerCost = 0;
+        double innerCost = 0;
         for (int d = 0; d < opt.dimension; d++)
             innerCost += opt.focus[u][d] * opt.context[v][d]; // dot product of node and context node vector
         // Add separate bias for each node
@@ -15,7 +15,7 @@ public class GloveCost implements CostFunction {
     }
 
     @Override
-    public float weightedCost(Optimizer opt, float innerCost, float Xij) {
+    public double weightedCost(Optimizer opt, double innerCost, double Xij) {
         return (Xij > opt.coMatrix.max()) ? innerCost : (float) FastMath.pow(Xij /  opt.coMatrix.max(), 0.75) * innerCost;
     }
 }

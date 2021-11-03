@@ -10,7 +10,7 @@ public interface CoOccurrenceMatrix {
 	double max();
 	int cIdx_I(int i);
 	int cIdx_J(int j);
-	float cIdx_C(int i);
+	double cIdx_C(int i);
 	int coOccurrenceCount();
 	void shuffle();
 }

@@ -25,6 +25,7 @@ public class NodeIndex implements KeyIndex {
 
             this.focusType = dataset.getPrefixMapping().expandPrefix(focusType);
             Resource focusResource = dataset.getDefaultModel().getResource(this.focusType);
+
             StmtIterator resources = dataset.getDefaultModel().listStatements();
             try {
                 while(resources.hasNext()) {

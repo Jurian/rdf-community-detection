@@ -5,4 +5,4 @@ import java.util.concurrent.Callable;
 /**
  * @author Jurian Baas
  */
-public interface OptimizeJob extends Callable<Float> { }
+public interface OptimizeJob extends Callable<Double> { }

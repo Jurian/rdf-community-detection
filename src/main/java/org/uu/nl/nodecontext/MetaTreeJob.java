@@ -2,6 +2,7 @@ package org.uu.nl.nodecontext;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Resource;
 import org.uu.nl.util.parallel.DatasetThread;
 
 import java.util.concurrent.Callable;
@@ -36,8 +37,12 @@ public class MetaTreeJob implements Callable<ContextVector> {
                     QuerySolution tree = trees.nextSolution();
                     numberOfTrees++;
                     for(String key : trees.getResultVars()) {
-                        Node node = tree.getResource(key).asNode();
-                        vector.addNode(nodeIndexes.getNodeID(node));
+                        Resource element = tree.getResource(key);
+                        if(element != null) {
+                            Node node = element.asNode();
+                            vector.addNode(nodeIndexes.getNodeID(node));
+                        }
+
                     }
                 }
             }

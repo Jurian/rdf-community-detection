@@ -18,8 +18,8 @@ public class ContextBuilder {
     final ExecutorService es;
     final CompletionService<ContextVector> completionService;
 
-    public ContextBuilder(DatasetThreadFactory factory) {
-        es = Executors.newCachedThreadPool(factory);
+    public ContextBuilder(int threads, DatasetThreadFactory factory) {
+        es = Executors.newFixedThreadPool(threads, factory);
         completionService = new ExecutorCompletionService<>(es);
     }
 

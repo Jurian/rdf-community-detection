@@ -2,6 +2,7 @@ package org.uu.nl;
 
 import org.apache.jena.query.Dataset;
 import org.apache.log4j.Logger;
+import org.uu.nl.communities.DBScanCommunities;
 import org.uu.nl.embedding.*;
 import org.uu.nl.embedding.grad.AMSGrad;
 import org.uu.nl.embedding.grad.Adagrad;
@@ -55,15 +56,18 @@ public class Main {
         dataset.close();
 
         final DatasetThreadFactory factory = new DatasetThreadFactory(new TDB2Reader(), config.getInput().getGraphFile());
-        final ContextMatrix matrix = new ContextBuilder(factory).build(new MetaTree(config.getInput().getMetaTree()), nodeIndex);
+        final ContextMatrix matrix = new ContextBuilder(config.getInput().getThreads(), factory)
+                .build(new MetaTree(config.getInput().getMetaTree()), nodeIndex);
         factory.closeAllDatasets();
 
         final IOptimizer optimizer = createOptimizer(config, matrix, nodeIndex);
 
-        final Optimum optimum = optimizer.optimize();
+        final Embedding embedding = optimizer.optimize();
+
+        DBScanCommunities communities = new DBScanCommunities(embedding, 0.04, 10);
 
         final EmbeddingWriter writer = getWriter(outFileName, config);
-        writer.write(optimum, matrix, Paths.get("").toAbsolutePath().resolve("out"));
+        writer.write(embedding, matrix, Paths.get("").toAbsolutePath().resolve("out"));
     }
 
     private static EmbeddingWriter getWriter(String outFileName, Configuration config) {

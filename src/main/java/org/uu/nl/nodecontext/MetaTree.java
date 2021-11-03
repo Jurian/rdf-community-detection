@@ -18,7 +18,6 @@ public class MetaTree  {
     }
 
     public Query getQuery(Node root) {
-        Query q = QueryFactory.create(String.format(query, root.getURI()));
-        return q;
+        return QueryFactory.create(query.replace("?root", "<" + root.getURI() + ">"));
     }
 }

@@ -14,16 +14,18 @@ public class Adagrad extends Optimizer {
     /**
      * Contains the sum of the squares of the past gradients w.r.t. to all parameters
      */
-    private final float[][] gradSqFocus, gradSqContext;
-    private final float[] gradSqFBias, gradSqCBias;
+    private final double[][] gradSqFocus;
+    private final double[][] gradSqContext;
+    private final double[] gradSqFBias;
+    private final double[] gradSqCBias;
 
     public Adagrad(CoOccurrenceMatrix coMatrix, KeyIndex keyIndex, Configuration config, CostFunction costFunction) {
         super(coMatrix, keyIndex, config, costFunction);
 
-        this.gradSqFocus = new float[focusVectors][dimension];
-        this.gradSqContext = new float[contextVectors][dimension];
-        this.gradSqFBias = new float[focusVectors];
-        this.gradSqCBias = new float[contextVectors];
+        this.gradSqFocus = new double[focusVectors][dimension];
+        this.gradSqContext = new double[contextVectors][dimension];
+        this.gradSqFBias = new double[focusVectors];
+        this.gradSqCBias = new double[contextVectors];
 
         for (int i = 0; i < contextVectors; i++) {
             gradSqCBias[i] = 1;
@@ -52,7 +54,12 @@ public class Adagrad extends Optimizer {
         return () -> {
 
             int i, d, u, v;
-            float cost = 0, Xij, innerCost, weightedCost, grad1, grad2;
+            double cost = 0;
+            double Xij;
+            double innerCost;
+            double weightedCost;
+            double grad1;
+            double grad2;
             final int offset = coCount / numThreads * id;
 
             for (i = 0; i < linesPerThread[id]; i++) {

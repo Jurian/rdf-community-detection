@@ -1,6 +1,6 @@
 package org.uu.nl.embedding;
 
 public interface CostFunction {
-    float innerCost(Optimizer opt, float Xij, int u, int v);
-    float weightedCost(Optimizer opt, float innerCost, float Xij);
+    double innerCost(Optimizer opt, double Xij, int u, int v);
+    double weightedCost(Optimizer opt, double innerCost, double Xij);
 }
