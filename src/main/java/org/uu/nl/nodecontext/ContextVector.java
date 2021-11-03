@@ -20,6 +20,7 @@ public class ContextVector extends HashMap<Integer, Float> {
     }
 
     public ContextVector normalize(float nTrees) {
+        remove(root);
         for(Entry<Integer, Float> entry : entrySet()) {
             entry.setValue(entry.getValue() / nTrees);
         }
