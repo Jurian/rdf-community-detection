@@ -68,6 +68,7 @@ public class ContextBuilder {
             return matrix;
 
         } finally {
+            es.shutdown();
             nodeIndex.clear();
         }
     }
