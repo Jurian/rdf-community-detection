@@ -6,12 +6,10 @@ import org.uu.nl.embedding.*;
 import org.uu.nl.embedding.grad.AMSGrad;
 import org.uu.nl.embedding.grad.Adagrad;
 import org.uu.nl.embedding.grad.Adam;
-import org.uu.nl.nodecontext.ContextBuilder;
-import org.uu.nl.nodecontext.ContextMatrix;
-import org.uu.nl.nodecontext.KeyIndex;
-import org.uu.nl.nodecontext.NodeIndex;
+import org.uu.nl.nodecontext.*;
 import org.uu.nl.util.config.Configuration;
 import org.uu.nl.util.config.InvalidConfigException;
+import org.uu.nl.util.parallel.DatasetThreadFactory;
 import org.uu.nl.util.read.ConfigReader;
 import org.uu.nl.util.read.TDB2Reader;
 import org.uu.nl.util.write.EmbeddingWriter;
@@ -52,11 +50,13 @@ public class Main {
 
         // Create an index of all nodes in the graph
         // Additionally, we force focus nodes te be in the front of the index
-        final Dataset dataset = loader.load(config.getInput().getGraphFile());
+        final Dataset dataset = new TDB2Reader().load(config.getInput().getGraphFile());
         final NodeIndex nodeIndex = new NodeIndex(config.getInput().getFocusType(), dataset);
+        dataset.close();
 
-        final ContextMatrix matrix = new ContextBuilder(config.getInput().getThreads())
-                .build(dataset, config.getInput().getMetaTrees(), nodeIndex);
+        final DatasetThreadFactory factory = new DatasetThreadFactory(new TDB2Reader(), config.getInput().getGraphFile());
+        final ContextMatrix matrix = new ContextBuilder(factory).build(new MetaTree(config.getInput().getMetaTree()), nodeIndex);
+        factory.closeAllDatasets();
 
         final IOptimizer optimizer = createOptimizer(config, matrix, nodeIndex);
 

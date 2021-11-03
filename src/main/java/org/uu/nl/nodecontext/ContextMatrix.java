@@ -52,16 +52,16 @@ public class ContextMatrix implements CoOccurrenceMatrix {
         permutation.shuffle();
     }
 
-    public int cIdx_I(int i) {
-        return rows[permutation.randomAccess(i)];
+    public int cIdx_I(int x) {
+        return rows[permutation.randomAccess(x)];
     }
 
-    public int cIdx_J(int j) {
-        return this.cols[permutation.randomAccess(j)];
+    public int cIdx_J(int x) {
+        return this.cols[permutation.randomAccess(x)];
     }
 
-    public float cIdx_C(int i) {
-        return this.values[permutation.randomAccess(i)];
+    public float cIdx_C(int x) {
+        return this.values[permutation.randomAccess(x)];
     }
 
     public int coOccurrenceCount() {

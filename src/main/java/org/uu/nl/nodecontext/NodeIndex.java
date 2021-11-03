@@ -3,9 +3,7 @@ package org.uu.nl.nodecontext;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ReadWrite;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 
 import java.util.HashMap;
@@ -20,17 +18,19 @@ public class NodeIndex implements KeyIndex {
     private final Map<Node, Integer> nodeIndexes = new HashMap<>();
 
     public NodeIndex(String focusType, Dataset dataset) {
-        this.focusType = focusType;
+
 
         try {
             dataset.begin(ReadWrite.READ);
 
-            StmtIterator resources = dataset.getUnionModel().listStatements();
+            this.focusType = dataset.getPrefixMapping().expandPrefix(focusType);
+            Resource focusResource = dataset.getDefaultModel().getResource(this.focusType);
+            StmtIterator resources = dataset.getDefaultModel().listStatements();
             try {
                 while(resources.hasNext()) {
                     final Resource res = resources.nextStatement().getSubject();
 
-                    if(isFocusNode(res)) {
+                    if(res.hasProperty(RDF.type, focusResource)) {
                         focusNodes.putIfAbsent(res.asNode(), focusNodes.size());
                     } else {
                         nodeIndexes.putIfAbsent(res.asNode(), nodeIndexes.size());
@@ -41,9 +41,12 @@ public class NodeIndex implements KeyIndex {
                     try {
                         while(properties.hasNext()){
                             Statement property = properties.nextStatement();
-                            // Ignore type information!
-                            if(property.getPredicate() != RDF.type)
-                                nodeIndexes.putIfAbsent(property.getObject().asNode(), nodeIndexes.size());
+
+                            RDFNode object = property.getObject();
+                            if(!isTypePredicate(property.getPredicate()))  // Ignore type information
+                                if(!(object.isResource() && object.asResource().hasProperty(RDF.type, focusResource))) // Ignore focus nodes
+                                    if(!object.isLiteral()) // Ignore literals
+                                        nodeIndexes.putIfAbsent(object.asNode(), nodeIndexes.size());
                         }
                     } finally {
                         properties.close();
@@ -83,8 +86,13 @@ public class NodeIndex implements KeyIndex {
     public Map<Node, Integer> getFocusNodes() {
         return focusNodes;
     }
+
     private boolean isFocusNode(Resource res) {
         return res.hasProperty(RDF.type, focusType);
+    }
+
+    private boolean isTypePredicate(Property predicate) {
+        return predicate.toString().equals(RDF.type.toString());
     }
 
     @Override

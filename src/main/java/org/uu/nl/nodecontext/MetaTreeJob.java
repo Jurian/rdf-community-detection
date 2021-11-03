@@ -2,19 +2,18 @@ package org.uu.nl.nodecontext;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.*;
+import org.uu.nl.util.parallel.DatasetThread;
 
 import java.util.concurrent.Callable;
 
 public class MetaTreeJob implements Callable<ContextVector> {
 
     private final Node root;
-    private final Dataset dataset;
     private final MetaTree metaTree;
     private final NodeIndex nodeIndexes;
 
-    public MetaTreeJob(Node root, Dataset dataset, MetaTree metaTree, NodeIndex nodeIndexes) {
+    public MetaTreeJob(Node root, MetaTree metaTree, NodeIndex nodeIndexes) {
         this.root = root;
-        this.dataset = dataset;
         this.metaTree = metaTree;
         this.nodeIndexes = nodeIndexes;
     }
@@ -22,7 +21,10 @@ public class MetaTreeJob implements Callable<ContextVector> {
     @Override
     public ContextVector call() {
         ContextVector vector = new ContextVector(nodeIndexes.getNodeID(root));
+        DatasetThread thread = (DatasetThread) Thread.currentThread();
+        Dataset dataset = thread.getDataset();
         dataset.begin(ReadWrite.READ);
+
         int numberOfTrees = 0;
         try {
 

@@ -75,7 +75,7 @@ public class Configuration {
 
     public static class Input {
 
-        private List<MetaTree> metaTrees;
+        private String metaTree;
         private int threads;
         private String graph;
         private String focusType;
@@ -108,12 +108,12 @@ public class Configuration {
             this.threads = threads;
         }
 
-        public List<MetaTree> getMetaTrees() {
-            return metaTrees;
+        public String getMetaTree() {
+            return this.metaTree;
         }
 
-        public void setMetaTrees(List<MetaTree> metaTrees) {
-            this.metaTrees = metaTrees;
+        public void setMetaTree(String metaTree) {
+            this.metaTree = metaTree;
         }
 
     }
