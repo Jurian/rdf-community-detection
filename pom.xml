@@ -35,6 +35,13 @@
 			<version>3.6.1</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.apporiented/hierarchical-clustering -->
+		<dependency>
+			<groupId>com.apporiented</groupId>
+			<artifactId>hierarchical-clustering</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+
 		<!-- Parsing YAML configuration file -->
 		<dependency>
 			<groupId>org.yaml</groupId>

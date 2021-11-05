@@ -3,6 +3,7 @@ package org.uu.nl;
 import org.apache.jena.query.Dataset;
 import org.apache.log4j.Logger;
 import org.uu.nl.communities.DBScanCommunities;
+import org.uu.nl.communities.HierarchicalCommunities;
 import org.uu.nl.embedding.*;
 import org.uu.nl.embedding.grad.AMSGrad;
 import org.uu.nl.embedding.grad.Adagrad;
@@ -64,7 +65,8 @@ public class Main {
 
         final Embedding embedding = optimizer.optimize();
 
-        DBScanCommunities communities = new DBScanCommunities(embedding, 0.04, 10);
+        //HierarchicalCommunities communities = new HierarchicalCommunities(embedding);
+        DBScanCommunities communities = new DBScanCommunities(embedding, 3, 3);
 
         final EmbeddingWriter writer = getWriter(outFileName, config);
         writer.write(embedding, matrix, Paths.get("").toAbsolutePath().resolve("out"));
