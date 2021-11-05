@@ -1,6 +1,7 @@
 package org.uu.nl.embedding;
 
 import org.apache.commons.math3.ml.clustering.Clusterable;
+import org.uu.nl.nodecontext.KeyIndex;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,11 +12,33 @@ import java.util.List;
  */
 public class Embedding implements Iterable<Embedding.EmbeddedEntity>{
 
-	private final Optimizer optimizer;
+	private final KeyIndex keys;
+	private final double[][] vectors;
+	private final int dimension;
+	private final int nPoints;
 	private final List<Double> costHistory = new ArrayList<>();
 
 	public Embedding(Optimizer optimizer) {
-		this.optimizer = optimizer;
+		this.dimension = optimizer.dimension;
+		this.nPoints = optimizer.focusVectors;
+		this.vectors = optimizer.focus;
+		this.keys = optimizer.nodeIndex;
+	}
+
+	public int getDimension() {
+		return dimension;
+	}
+
+	public int getNumberOfPoints() {
+		return nPoints;
+	}
+
+	public double[][] getVectors() {
+		return vectors;
+	}
+
+	public KeyIndex getKeyIndex() {
+		return this.keys;
 	}
 
 	public void addIntermediaryResult(double result) {
@@ -41,7 +64,7 @@ public class Embedding implements Iterable<Embedding.EmbeddedEntity>{
 
 		@Override
 		public boolean hasNext() {
-			return focusIndex < optimizer.focusVectors;
+			return focusIndex < nPoints;
 		}
 
 		@Override
@@ -49,8 +72,8 @@ public class Embedding implements Iterable<Embedding.EmbeddedEntity>{
 
 			final EmbeddedEntity entity = new EmbeddedEntity(
 					focusIndex,
-					optimizer.nodeIndex.getKey(focusIndex),
-					optimizer.focus[focusIndex]
+					keys.getKey(focusIndex),
+					vectors[focusIndex]
 			);
 
 			focusIndex++;

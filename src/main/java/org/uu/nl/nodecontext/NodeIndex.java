@@ -100,4 +100,9 @@ public class NodeIndex implements KeyIndex {
     public String getKey(int index) {
         return focusKeys[index];
     }
+
+    @Override
+    public String[] getKeys() {
+        return this.focusKeys;
+    }
 }
