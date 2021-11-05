@@ -53,11 +53,11 @@ public class Main {
         // Additionally, we force focus nodes te be in the front of the index
         final Dataset dataset = new TDB2Reader().load(config.getInput().getGraphFile());
         final NodeIndex nodeIndex = new NodeIndex(config.getInput().getFocusType(), dataset);
-        dataset.close();
 
         final DatasetThreadFactory factory = new DatasetThreadFactory(new TDB2Reader(), config.getInput().getGraphFile());
         final ContextMatrix matrix = new ContextBuilder(config.getInput().getThreads(), factory)
-                .build(new MetaTree(config.getInput().getMetaTree()), nodeIndex);
+                .build(new MetaTree(config.getInput().getMetaTree()), nodeIndex, dataset);
+        dataset.close();
         factory.closeAllDatasets();
 
         final IOptimizer optimizer = createOptimizer(config, matrix, nodeIndex);

@@ -2,7 +2,8 @@ package org.uu.nl.nodecontext;
 
 import me.tongfei.progressbar.ProgressBar;
 import org.apache.jena.graph.Node;
-import org.apache.jena.query.Dataset;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Resource;
 import org.uu.nl.util.config.Configuration;
 import org.uu.nl.util.parallel.DatasetThreadFactory;
 import org.uu.nl.util.read.TDB2Reader;
@@ -23,10 +24,21 @@ public class ContextBuilder {
         completionService = new ExecutorCompletionService<>(es);
     }
 
-    public ContextMatrix build(MetaTree metaTree, NodeIndex nodeIndex ) {
+    public ContextMatrix build(MetaTree metaTree, NodeIndex nodeIndex, Dataset dataset ) {
 
         try {
             final int nFocusNodes = nodeIndex.nFocusNodes;
+
+            /*
+            dataset.begin(ReadWrite.READ);
+            Query query = QueryFactory.create(MetaTree.createCountQuery(MetaTree.addValues(metaTree.getQuery(),nodeIndex)));
+            int queryResultSize;
+            try(QueryExecution qExec = QueryExecutionFactory.create(query, dataset)) {
+                QuerySolution countSolution = qExec.execSelect().nextSolution();
+                queryResultSize = countSolution.getLiteral("count").getInt();
+            }finally {
+                dataset.end();
+            }*/
 
             for(Node root : nodeIndex.getFocusNodes().keySet()) {
                 completionService.submit(new MetaTreeJob(root, metaTree, nodeIndex ));

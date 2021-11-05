@@ -28,7 +28,6 @@ public class MetaTreeJob implements Callable<ContextVector> {
 
         int numberOfTrees = 0;
         try {
-
             try(QueryExecution qExec = QueryExecutionFactory.create(metaTree.getQuery(root), dataset)) {
                 ResultSet trees = qExec.execSelect();
 
