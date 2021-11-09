@@ -79,6 +79,7 @@ public class Configuration {
         private int threads;
         private String graph;
         private String focusType;
+        private boolean inMemory = true;
 
         public String getFocusType() {
             return focusType;
@@ -116,6 +117,13 @@ public class Configuration {
             this.metaTree = metaTree;
         }
 
+        public boolean isInMemory() {
+            return inMemory;
+        }
+
+        public void setInMemory(boolean inMemory) {
+            this.inMemory = inMemory;
+        }
     }
 
     public static class Embedding {

@@ -14,6 +14,8 @@ import org.uu.nl.util.config.Configuration;
 import org.uu.nl.util.config.InvalidConfigException;
 import org.uu.nl.util.parallel.DatasetThreadFactory;
 import org.uu.nl.util.read.ConfigReader;
+import org.uu.nl.util.read.InMemoryReader;
+import org.uu.nl.util.read.Reader;
 import org.uu.nl.util.read.TDB2Reader;
 import org.uu.nl.util.write.EmbeddingWriter;
 import org.uu.nl.util.write.GloVeWriter;
@@ -49,14 +51,19 @@ public class Main {
 
         Configuration.setThreadLocalRandom();
 
-        final TDB2Reader loader = new TDB2Reader();
+        final Reader<Dataset> loader;
+        if(config.getInput().isInMemory()) {
+            loader = new InMemoryReader();
+        } else {
+            loader = new TDB2Reader();
+        }
 
         // Create an index of all nodes in the graph
         // Additionally, we force focus nodes te be in the front of the index
-        final Dataset dataset = new TDB2Reader().load(config.getInput().getGraphFile());
+        final Dataset dataset = loader.load(config.getInput().getGraphFile());
         final NodeIndex nodeIndex = new NodeIndex(config.getInput().getFocusType(), dataset);
 
-        final DatasetThreadFactory factory = new DatasetThreadFactory(new TDB2Reader(), config.getInput().getGraphFile());
+        final DatasetThreadFactory factory = new DatasetThreadFactory(loader, config.getInput().getGraphFile());
         final ContextMatrix matrix = new ContextBuilder(config.getInput().getThreads(), factory)
                 .build(new MetaTree(config.getInput().getMetaTree()), nodeIndex, dataset);
         dataset.close();
